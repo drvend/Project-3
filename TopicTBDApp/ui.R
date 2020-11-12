@@ -9,6 +9,8 @@
 
 library(shiny)
 
+
+
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
 
@@ -19,22 +21,18 @@ shinyUI(fluidPage(
   tabsetPanel(
     tabPanel("Information Page", 
              sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("distPlot")
-        )
+        sidebarPanel(),
+        mainPanel()
     )
 ),
 
-tabPanel("DataExploration", ),
+tabPanel("DataExploration",
+         sidebarLayout(
+             sidebarPanel(),
+             mainPanel(
+                 plotOutput("output$heatmap"))
+         )
+         ),
 
 tabPanel("Clustering or Principal Components Analysis", ),
 

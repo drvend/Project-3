@@ -8,19 +8,123 @@
 #
 
 library(shiny)
+library(readr)
+library(dplyr)
+library(reshape2)
+library(ggplot2)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
+    
+    FFdataw1 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week1.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw1 <- mutate(FFdataw1, Week = 1)
+    
+    FFdataw2 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week2.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw2 <- mutate(FFdataw1, Week = 2)
+    
+    FFdataw3 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week3.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw3 <- mutate(FFdataw1, Week = 3)
+    
+    FFdataw4 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week4.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw4 <- mutate(FFdataw1, Week = 4)
+    
+    FFdataw5 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week5.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw5 <- mutate(FFdataw1, Week = 5)
+    
+    FFdataw6 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week6.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw6 <- mutate(FFdataw1, Week = 6)
+    
+    FFdataw7 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week7.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw7 <- mutate(FFdataw1, Week = 7)
+    
+    FFdataw8 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week8.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw8 <- mutate(FFdataw1, Week = 8)
+    
+    FFdataw9 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week9.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw9 <- mutate(FFdataw1, Week = 9)
+    
+    FFdataw10 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week10.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw10 <- mutate(FFdataw1, Week = 10)
+    
+    FFdataw11 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week11.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw11 <- mutate(FFdataw1, Week = 11)
+    
+    FFdataw12 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week12.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw12 <- mutate(FFdataw1, Week = 12)
+    
+    FFdataw13 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week13.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw13 <- mutate(FFdataw1, Week = 13)
+    
+    FFdataw14 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week14.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw14 <- mutate(FFdataw1, Week = 14)
+    
+    FFdataw15 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week15.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw15 <- mutate(FFdataw1, Week = 15)
+    
+    FFdataw16 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week16.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw16 <- mutate(FFdataw1, Week = 16)
+    
+    FFdataw17 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week17.csv', header= TRUE, stringsAsFactors = TRUE)
+    FFdataw17 <- mutate(FFdataw1, Week = 17)
+    
+    Predictiondata <- read.csv('C:/Users/drven/Documents/ST 558/Project-3/2019projections.csv')
+    
+    FFdatatotal <- rbind(FFdataw1, FFdataw2, FFdataw3, FFdataw4, FFdataw5, FFdataw6, FFdataw7, FFdataw8, FFdataw9, FFdataw10, FFdataw11, FFdataw12, FFdataw13, FFdataw14, FFdataw15, FFdataw16, FFdataw17)
+    
+    fantasyData <- left_join(Predictiondata, FFdatatotal, by = c("Player", "Week"))
 
-    output$distPlot <- renderPlot({
+    shinyServer(function(input, output) {
 
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
-
+        # Create Correlation heatmap
+        
+        fantasyDataNumeric <- fantasyData 
+        
+        fantasyDataNumeric$Player <- as.numeric(as.factor(fantasyData$Player))
+        fantasyDataNumeric$Pos.x <- as.numeric(as.factor(fantasyData$Pos.x))
+        fantasyDataNumeric$Status <- as.numeric(as.factor(fantasyData$Status))
+        fantasyDataNumeric$Pos.y <- as.numeric(as.factor(fantasyData$Pos.y))
+        fantasyDataNumeric$Tm <- as.numeric(as.factor(fantasyData$Tm))
+        
+        cormat <- round(cor(fantasyDataNumeric),2)
+        melted_cor <- melt(cormat)
+        
+        # Get lower triangle of the correlation matrix
+        get_lower_tri<-function(cormat){
+            cormat[upper.tri(cormat)] <- NA
+            return(cormat)
+        }
+        # Get upper triangle of the correlation matrix
+        get_upper_tri <- function(cormat){
+            cormat[lower.tri(cormat)]<- NA
+            return(cormat)
+        }
+        
+        upper_tri <- get_upper_tri(cormat)
+        
+        melted_cor <- melt(upper_tri, na.rm = TRUE)
+        
+        
+        #Subset only for Shares 
+        #melted_cor <- filter(melted_cor, melted_cor$Var2 == "shares")
+        
+        print(melted_cor)
+        
+        # Heatmap
+        g1 <- ggplot(data = melted_cor, aes(Var2, Var1, fill = value))+
+            geom_tile(color = "white")+
+            scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                                 midpoint = 0, limit = c(-1,1), space = "Lab", 
+                                 name="Pearson\nCorrelation") +
+            theme_minimal()+ 
+            theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+                                             size = 8, hjust = 1))+
+            theme(axis.text.y = element_text(vjust = 1, 
+                                             size = 8, hjust = 1))+
+            coord_fixed()
+        
+        print(g1)
+        
+        output$heatmap <- renderPlot({g1})
     })
 
 })
