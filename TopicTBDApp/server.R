@@ -69,7 +69,7 @@ shinyServer(function(input, output) {
     # FFdataw17 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week17.csv', header= TRUE, stringsAsFactors = TRUE)
     # FFdataw17 <- mutate(FFdataw17, Week = 17)
     # 
-    # Predictiondata <- read.csv('C:/Users/drven/Documents/ST 558/Project-3/2019projections.csv')
+     Predictiondata <- read.csv('C:/Users/drven/Documents/ST 558/Project-3/2019projections.csv')
     # 
     # FFdatatotal <- rbind(FFdataw1, FFdataw2, FFdataw3, FFdataw4, FFdataw5, FFdataw6, FFdataw7, FFdataw8, FFdataw9, FFdataw10, FFdataw11, FFdataw12, FFdataw13, FFdataw14, FFdataw15, FFdataw16, FFdataw17)
     # 
@@ -82,10 +82,12 @@ shinyServer(function(input, output) {
     
     FFdatatotal = readRDS("C:/Users/drven/Documents/ST 558/Project-3/FFdatatotal.RDS")
     
+    fantasyData <- as.data.frame(left_join(Predictiondata, FFdatatotal, by = c("Player", "Week")))
     
+     fantasyData[is.na(fantasyData)] <- 0 
+     
+     fantasyData$Pos.y[fantasyData$Pos.y == 'HB'] <- 'RB'
     
-    
-    fantasyData <- left_join(Predictiondata, FFdatatotal, by = c("Player", "Week"))
 
         # Create Correlation heatmap
         
@@ -183,9 +185,33 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
 
         output$heatmap <- renderPlot({ggheatmap})
         
-        output$summary <- renderTable({fantasyData %>% group_by(Player) %>% summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgPA = mean(PassingAtt), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
-        })
-    
+        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgPA = mean(PassingAtt), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        
+        sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgPA = mean(PassingAtt), avgRA = mean(RushingAtt))
+        
+        sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        
+        sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        
+        sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        
+        #try renderDataTable later 
+        
+        output$summary <- renderTable({
+          if(input$pos == "QB"){sQB}
+          else{
+            if(input$pos == "WR"){sWR}
+            else{
+              if(input$pos == "RB"){sRB}
+              else{
+                if(input$pos == "TE"){sTE}
+                else{sALL}
+          }
+            }
+              }
+                }
+          )
+        
 # Clustering with Dendogram 
         
   #  scaledData <- scale(fantasyDataNumeric, center = TRUE, scale = TRUE)
@@ -197,9 +223,10 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
         
     # Data Table for the Data Table tab 
-    output$rawData <- renderDataTable({fantasyData}, 
-                    extensions = 'Buttons',
-                    options = list("dom" = 'T<"clear">lBfrtip', buttons = list('copy', 'csv', 'excel', 'pdf', 'print'))
+    output$rawData <- renderDataTable({fantasyData}
+                                      #, 
+                  #  extensions = 'Buttons',
+                  #  options = list("dom" = 'T<"clear">lBfrtip', buttons = list('copy', 'csv', 'excel', 'pdf', 'print'))
     )
     
 })
