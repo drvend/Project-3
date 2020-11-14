@@ -199,6 +199,8 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
         sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
         
+
+        
         #If - else logic to select data for summary display 
         
         output$summary <- renderDataTable({
@@ -218,20 +220,14 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
         
         
-        QBscatter1 <- ggplot(sQB, aes(x = avgProjectedPoints, y = avgPassingAttempts)) + geom_point()
+      #  QBscatter1 <- ggplot(sQB, aes(x = avgProjectedPoints, y = AvgPassingA)) + geom_point()
         
-        QBscatter2 <- ggplot(sQB, aes(x = avgProjectedPoints, y = avgCompletions)) + geom_point()
+    #    QBscatter2 <- ggplot(sQB, aes(x = avgCompletions, y = AvgPA)) + geom_point()
         
-        print(QBscatter1)
-        
-        print(QBscatter2)
-        
-        
-        
-        output$qbScatter <- renderDataTable({
-          if(input$qbScatter == "Passing Attempts vs. Actual Points"){QBscatter1}
-          else{QBscatter2}
-        })
+     #   output$qbScatter <- renderDataTable({
+      #    if(input$qbScatter == "Passing Attempts vs. Actual Points"){QBscatter1}
+        #  else{QBscatter2}
+       # })
         
 # Clustering with Dendogram 
         
@@ -244,7 +240,25 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
         
     # Output Data Table for the Data Table tab 
-    output$rawData <- renderDataTable({fantasyData}) 
-                                      #extensions = 'Buttons', options = list("dom" = 'T<"clear">lBfrtip', buttons = list('copy', 'csv', 'excel', 'pdf', 'print')))
+        
+        rdQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)
+        
+        rdWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)
+        
+        rdRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)
+        
+        rdTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)
+        
+        output$rawData <- renderDataTable({
+          if(input$pos2 == "QB"){rdQB}
+          else{
+            if(input$pos2 == "WR"){rdWR}
+            else{
+              if(input$pos2 == "RB"){rdRB}
+              else{
+                if(input$pos2 == "TE"){rdTE}
+                else{fantasyData}
+              }}}}, extensions = 'Buttons', options = list("dom" = 'T<"clear">lBfrtip', buttons = list('copy', 'csv', 'excel', 'pdf', 'print'))) 
+                                      
     
 })

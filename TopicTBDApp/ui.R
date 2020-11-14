@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(DT)
 # Define UI 
 shinyUI(fluidPage(
 
@@ -28,23 +29,25 @@ shinyUI(fluidPage(
 tabPanel("Data Exploration",
          sidebarLayout(
              sidebarPanel(
-               radioButtons("pos", "Position", choices = c("All", "QB", "WR", "RB", "TE"), selected = "All"), conditionalPanel(condition = "input.pos == 'QB'", radioButtons("qbScatter", "QB Scatterplots", choices = c("Passing Attempts vs. Actual Points", "Completetions vs. Actual Points")))
-             ),
+               radioButtons("pos", "Position", choices = c("All", "QB", "WR", "RB", "TE"), selected = "All")),
              mainPanel(
                dataTableOutput("summary"),
                plotOutput("heatmap"))
          )
          ),
 
-tabPanel("Clustering Analysis", 
+tabPanel("Clustering Analysis" 
          
          
          
          
          ),
 
-tabPanel("Modeling",),
+tabPanel("Modeling"),
 
-tabPanel("Data Table", dataTableOutput("rawData"))
+tabPanel("Data Table", sidebarLayout(
+  sidebarPanel(
+    radioButtons("pos2", "Position", choices = c("All", "QB", "WR", "RB", "TE"), selected = "All")),
+  mainPanel(dataTableOutput("rawData")))
 )
-))
+)))
