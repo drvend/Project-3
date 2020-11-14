@@ -168,7 +168,7 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         # Print the heatmap
         print(ggheatmap)
         
-        ggheatmap <- ggheatmap + geom_text(aes(Var2, Var1, label = value), color = "black", size = 2) +theme(
+        ggheatmap <- ggheatmap + geom_text(aes(Var2, Var1, label = value), color = "black", size = 1) +theme(
                 axis.title.x = element_blank(),
                 axis.title.y = element_blank(),
                 panel.grid.major = element_blank(),
@@ -182,22 +182,26 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
                                          title.position = "top", title.hjust = 0.5))
         
         print(ggheatmap)
+        
+        #Output Heatmap 
 
         output$heatmap <- renderPlot({ggheatmap})
         
-        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgPA = mean(PassingAtt), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        # Creating Summary Data Sets 
         
-        sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgPA = mean(PassingAtt), avgRA = mean(RushingAtt))
+        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
         
-        sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp))
         
-        sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
         
-        sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProj = mean(Proj), avgActual = mean(Actual), avgRA = mean(RushingAtt), avgTgt = mean(Tgt))
+        sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
         
-        #try renderDataTable later 
+        sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
         
-        output$summary <- renderTable({
+        #If - else logic to select data for summary display 
+        
+        output$summary <- renderDataTable({
           if(input$pos == "QB"){sQB}
           else{
             if(input$pos == "WR"){sWR}
@@ -212,6 +216,23 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
                 }
           )
         
+        
+        
+        QBscatter1 <- ggplot(sQB, aes(x = avgProjectedPoints, y = avgPassingAttempts)) + geom_point()
+        
+        QBscatter2 <- ggplot(sQB, aes(x = avgProjectedPoints, y = avgCompletions)) + geom_point()
+        
+        print(QBscatter1)
+        
+        print(QBscatter2)
+        
+        
+        
+        output$qbScatter <- renderDataTable({
+          if(input$qbScatter == "Passing Attempts vs. Actual Points"){QBscatter1}
+          else{QBscatter2}
+        })
+        
 # Clustering with Dendogram 
         
   #  scaledData <- scale(fantasyDataNumeric, center = TRUE, scale = TRUE)
@@ -222,11 +243,8 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
 # Modeling 
         
         
-    # Data Table for the Data Table tab 
-    output$rawData <- renderDataTable({fantasyData}
-                                      #, 
-                  #  extensions = 'Buttons',
-                  #  options = list("dom" = 'T<"clear">lBfrtip', buttons = list('copy', 'csv', 'excel', 'pdf', 'print'))
-    )
+    # Output Data Table for the Data Table tab 
+    output$rawData <- renderDataTable({fantasyData}) 
+                                      #extensions = 'Buttons', options = list("dom" = 'T<"clear">lBfrtip', buttons = list('copy', 'csv', 'excel', 'pdf', 'print')))
     
 })

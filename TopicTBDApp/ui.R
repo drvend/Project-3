@@ -28,11 +28,11 @@ shinyUI(fluidPage(
 tabPanel("Data Exploration",
          sidebarLayout(
              sidebarPanel(
-               radioButtons("pos", "Position", choices = c("All", "QB", "WR", "RB", "TE"), selected = "All")
+               radioButtons("pos", "Position", choices = c("All", "QB", "WR", "RB", "TE"), selected = "All"), conditionalPanel(condition = "input.pos == 'QB'", radioButtons("qbScatter", "QB Scatterplots", choices = c("Passing Attempts vs. Actual Points", "Completetions vs. Actual Points")))
              ),
              mainPanel(
-               plotOutput("heatmap"), 
-               tableOutput("summary"))
+               dataTableOutput("summary"),
+               plotOutput("heatmap"))
          )
          ),
 
