@@ -189,21 +189,36 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
         # Creating Summary Data Sets 
         
-        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
+        output$summary <- renderDataTable({
+        
+        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt)) 
+        
+        #%>% dplyr::select(input$variables)
+        
+      #  sALL <- round(sALL[2:5], input$nI)
+        
         
         sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp))
         
+    #    sQB <- round(sQB[2:5], input$nI)
+        
         sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
+        
+     #   sWR <- round(sWR[2:5], input$nI)
         
         sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
         
+     #   sRB <- round(sRB[2:5], input$nI)
+        
         sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
+        
+     #   sTE <- round(sTE[2:5], input$nI)
         
 
         
         #If - else logic to select data for summary display 
         
-        output$summary <- renderDataTable({
+        
           if(input$pos == "QB"){sQB}
           else{
             if(input$pos == "WR"){sWR}
@@ -231,9 +246,28 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
 # Clustering with Dendogram 
         
-  #  scaledData <- scale(fantasyDataNumeric, center = TRUE, scale = TRUE)
+    scaledData <- scale(fantasyDataNumeric, center = TRUE, scale = TRUE)
         
-#clustmodel <- hclust()
+    
+    # Combine the selected variables into a new data frame
+    selectedData <- reactive({
+      scaledData[, c(input$xcol, input$ycol)]
+    })
+    
+    clusters <- reactive({
+      kmeans(selectedData(), input$clusters)
+    })
+    
+    output$plot1 <- renderPlot({
+      palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
+                "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"))
+      
+      par(mar = c(5.1, 4.1, 0, 1))
+      plot(selectedData(),
+           col = clusters()$cluster,
+           pch = 20, cex = 3)
+      points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
+    })
         
         
 # Modeling 
