@@ -15,9 +15,9 @@ library(ggplot2)
 library(caret)
 #library(DT)
 
-# Define server logic required to draw a histogram
-shinyServer(function(input, output) {
-    # 
+# Server
+shinyServer(function(input, output, session) {
+    # # Download data from the web if needed 
     # FFdataw1 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week1.csv', header= TRUE, stringsAsFactors = TRUE)
     # FFdataw1 <- mutate(FFdataw1, Week = 1)
     # 
@@ -68,6 +68,8 @@ shinyServer(function(input, output) {
     # 
     # FFdataw17 <- read.csv('https://raw.githubusercontent.com/fantasydatapros/data/master/weekly/2019/week17.csv', header= TRUE, stringsAsFactors = TRUE)
     # FFdataw17 <- mutate(FFdataw17, Week = 17)
+  
+  # read in data set for prediction data here 
     # 
      Predictiondata <- read.csv('C:/Users/drven/Documents/ST 558/Project-3/2019projections.csv')
     # 
@@ -79,20 +81,24 @@ shinyServer(function(input, output) {
     
     ########
     
-    
+    # Read in data set downloaded from the web here 
+     
     FFdatatotal = readRDS("C:/Users/drven/Documents/ST 558/Project-3/FFdatatotal.RDS")
     
+    # Join data sets 
     fantasyData <- as.data.frame(left_join(Predictiondata, FFdatatotal, by = c("Player", "Week")))
     
+    # Replace na data with 0 
      fantasyData[is.na(fantasyData)] <- 0 
      
+     # replace "hb" with "rb" 
      fantasyData$Pos.y[fantasyData$Pos.y == 'HB'] <- 'RB'
     
 
         # Create Correlation heatmap
         
-        fantasyDataNumeric <- fantasyData 
-        
+        fantasyDataNumeric <- fantasyData
+
         fantasyDataNumeric$Player <- as.numeric(as.factor(fantasyData$Player))
         fantasyDataNumeric$Pos.x <- as.numeric(as.factor(fantasyData$Pos.x))
         fantasyDataNumeric$Status <- as.numeric(as.factor(fantasyData$Status))
@@ -191,26 +197,24 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
         output$summary <- renderDataTable({
         
-        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt)) 
-        
-        #%>% dplyr::select(input$variables)
+        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
         
       #  sALL <- round(sALL[2:5], input$nI)
         
         
-        sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp))
+        sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt))%>%  dplyr::select(Player, input$var1, input$var2)
         
     #    sQB <- round(sQB[2:5], input$nI)
         
-        sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
+        sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
         
      #   sWR <- round(sWR[2:5], input$nI)
         
-        sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
+        sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
         
      #   sRB <- round(sRB[2:5], input$nI)
         
-        sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgRushingAttempts = mean(RushingAtt), avgTargets = mean(Tgt))
+        sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
         
      #   sTE <- round(sTE[2:5], input$nI)
         
@@ -234,42 +238,49 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
           )
         
         
-        
-      #  QBscatter1 <- ggplot(sQB, aes(x = avgProjectedPoints, y = AvgPassingA)) + geom_point()
-        
-    #    QBscatter2 <- ggplot(sQB, aes(x = avgCompletions, y = AvgPA)) + geom_point()
-        
+    #     
+    #   #  QBscatter1 <- ggplot(sQB, aes(x = avgProjectedPoints, y = AvgPassingA)) + geom_point()
+    #     
+    # #    QBscatter2 <- ggplot(sQB, aes(x = avgCompletions, y = AvgPA)) + geom_point()
+    #     
      #   output$qbScatter <- renderDataTable({
-      #    if(input$qbScatter == "Passing Attempts vs. Actual Points"){QBscatter1}
-        #  else{QBscatter2}
-       # })
+     #    if(input$qbScatter == "Passing Attempts vs. Actual Points"){QBscatter1}
+     #  else{QBscatter2}
+     # })
         
 # Clustering with Dendogram 
-        
-    scaledData <- scale(fantasyDataNumeric, center = TRUE, scale = TRUE)
-        
-    
+
+    scaledData <- as.data.frame(scale(fantasyDataNumeric, center = TRUE, scale = TRUE))
+
     # Combine the selected variables into a new data frame
     selectedData <- reactive({
+     
       scaledData[, c(input$xcol, input$ycol)]
     })
-    
+
     clusters <- reactive({
       kmeans(selectedData(), input$clusters)
     })
-    
+
     output$plot1 <- renderPlot({
       palette(c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3",
                 "#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999"))
-      
+
       par(mar = c(5.1, 4.1, 0, 1))
       plot(selectedData(),
            col = clusters()$cluster,
            pch = 20, cex = 3)
       points(clusters()$centers, pch = 4, cex = 4, lwd = 4)
     })
-        
-        
+
+    output$plot2 <- renderPlot({
+      hierClust <- hclust(dist(selectedData()))
+    plot(hierClust, xlab = "")
+      })
+    
+    
+
+
 # Modeling 
         
         
