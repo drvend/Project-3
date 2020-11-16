@@ -13,6 +13,7 @@ library(dplyr)
 library(reshape2)
 library(ggplot2)
 library(caret)
+library(randomForest)
 #library(DT)
 
 # Server
@@ -282,7 +283,35 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
 
 
 # Modeling 
-        
+    
+    # Train and Test sets 
+    
+    qbData <- filter(fantasyData, Pos.y == "QB")
+    
+    set.seed(420)
+    qbIndex <- createDataPartition(qbData$X, p = 0.8, list = FALSE)
+    qbTrain <- qbData[qbIndex, ]
+    qbTest <- qbData[-qbIndex, ]
+    
+    # Linear model 
+    
+    lmFit <- train(Actual ~ Cmp, data = qbTrain,
+                   method = "lm")
+    
+    predlm <- predict(lmFit, newdata = qbTest)
+    postResample(predlm, qbTest$X)
+    
+    output$lmFit <- renderPrint({lmFit}) 
+    
+    # Random Forest Model 
+
+    rfFit <- train(Actual ~ Cmp, data = qbTrain,
+                   method = "rf",
+                   trControl = trainControl(method = "cv",
+                                            number = 5),
+                   tuneGrid = data.frame(mtry = 1:9))
+    
+    output$rfFit <- renderPrint({rfFit})
         
     # Output Data Table for the Data Table tab 
         
