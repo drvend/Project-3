@@ -6,7 +6,7 @@
 #
 #    http://shiny.rstudio.com/
 #
-# packages required to run this coded are listed below
+# Packages required to run this coded are listed below
 library(shiny)
 library(readr)
 library(dplyr)
@@ -14,7 +14,7 @@ library(reshape2)
 library(ggplot2)
 library(caret)
 library(randomForest)
-#library(DT)
+library(DT)
 
 # Server
 shinyServer(function(input, output, session) {
@@ -308,8 +308,9 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
     rfFit <- train(Actual ~ Cmp, data = qbTrain,
                    method = "rf",
                    trControl = trainControl(method = "cv",
-                                            number = 5),
-                   tuneGrid = data.frame(mtry = 1:9))
+                                            number = 5)
+                   #,tuneGrid = data.frame(mtry = 1:9)
+                   )
     
     output$rfFit <- renderPrint({rfFit})
         

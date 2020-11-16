@@ -8,7 +8,6 @@
 #
 
 library(shiny)
-library(DT)
 
 # choices <- c("Player", "avgProjectedPoints", "avgActualPoints", "avgPassingAttempts", "avgRushingAttempts", "avgTargets")
 
