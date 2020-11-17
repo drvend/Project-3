@@ -295,14 +295,21 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
     
     # Linear model 
     
-    lmFit <- train(Actual ~ Cmp, data = qbTrain,
-                   method = "lm")
+    lmFitvalue <- reactive({lmFit <- train(input$response ~ input$predictor, data = qbTrain, method = "lm")})
     
-    predlm <- predict(lmFit, newdata = qbTest)
-    postResample(predlm, qbTest$X)
     
-    output$lmFit <- renderPrint({lmFit}) 
     
+    output$lmFit <- renderPrint({
+      predlm <- predict(lmFitvalue(), newdata = qbTest)
+      postResample(predlm, qbTest$X)
+      lmFitvalue()}) 
+    
+    # Linear Model Output for Numeric Input 
+    
+     predlm2value <- reactive({ predlm2<-predict(lmFitvalue(), newdata = data.frame(Cmp = input$predictorvalue))})
+    
+    output$lmFit2 <- renderPrint({predlm2value()})
+
     # Random Forest Model 
 
     rfFit <- train(Actual ~ Cmp, data = qbTrain,

@@ -73,9 +73,11 @@ tabPanel("Modeling",
 sidebarLayout(
   sidebarPanel(
     selectInput('response', 'Response Variable' , c( "avgProjectedPoints", "avgActualPoints")), 
-    selectInput('predictor', 'Predictor Variable', c("avgPassingAttempts", "avgRushingAttempts", "avgTargets", "avgCompletions"))), 
-    mainPanel(verbatimTextOutput("lmFit"), 
-              verbatimTextOutput("rfFit"))
+    selectInput('predictor', 'Predictor Variable', c("avgPassingAttempts", "avgRushingAttempts", "avgTargets", "avgCompletions")),
+    numericInput('predictorvalue', 'Predictor Value', 20, min =0, max = 100, )), 
+    mainPanel("Linear Regression Model", verbatimTextOutput("lmFit"),
+              "Linear Regression Model with User Selected Numeric Input", verbatimTextOutput("lmFit2"),
+              "Random Forest Model: Completions predicting Actual Points", verbatimTextOutput("rfFit"))
 )),
 
 tabPanel("Data Table", sidebarLayout(
