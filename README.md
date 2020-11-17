@@ -5,4 +5,4 @@ install.packages(c("shiny", "readr", "dplyr", "reshape2", "ggplot2", "caret", "r
 
 R code to run code from github: 
 
-shiny::runGitHub("Project-3", "drvend")
+shiny::runGitHub("Project-3", "TopicTBDApp/drvend")
