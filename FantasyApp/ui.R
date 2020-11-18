@@ -34,14 +34,15 @@ tabPanel("Data Exploration",
              sidebarPanel(
                radioButtons("pos", "Position", choices = c("All", "QB", "WR", "RB", "TE"), selected = "All"),
                selectInput('var1', 'Summary Variable 1' , c( "avgProjectedPoints", "avgActualPoints")),
-                selectInput('var2', 'Summary Variable 2', c("avgPassingAttempts", "avgRushingAttempts", "avgTargets", "avgCompletions")) 
-              # numericInput("nI", "Select the Number of Digits for Rounding",                        min=0,max=3,value=0,step=1),
-               
-            #  varSelectInput("variables", "Variable:", choices, multiple = TRUE),
+                selectInput('var2', 'Summary Variable 2', c("avgPassingAttempts", "avgRushingAttempts", "avgTargets", "avgCompletions"))
+              # ,selectInput('scattervar1', 'Scatterplot X Varible' , c( "Pos.y", "Tm", "PassingAtt", "RushingAtt", "Rec", "Tgt")),
+              # selectInput('scattervar2', 'Scatterplot Y Variable', c("Actual", "Proj")),
               ),
-             mainPanel(
+             mainPanel(h5("This page provides a table with summary data as well as a heatmap that shows the correlations between the variables of the data set. The Summary Variable 2 will change as the inputted position changes which is one of my dynamic UI elements."),
                dataTableOutput("summary"),
-               plotOutput("heatmap"))
+               plotOutput("heatmap")
+              # , plotOutput("scatterp1")
+              )
          )
          ),
 
@@ -50,16 +51,22 @@ tabPanel("Clustering",
   pageWithSidebar(
           headerPanel('Fantasy Football Data k-means clustering'),
           sidebarPanel(
-           # radioButtons("pos5", "Position", choices = c("All", "QB", "WR", "RB", "TE"), selected = "All"),
+           
              selectInput('xcol', 'X Variable', c("Week", "Team", "Player", "Slot", "Pos.x", "Status", "Proj", "Actual", "Pos.y", "Tm", "PassingYds", "PassingTD", "Int", "PassingAtt", "Cmp", "RushingAtt", "RushingYds", "RushingTD", "Rec", "Tgt", "ReceivingYds", "ReceivingTD", "FL", "PPRFantasyPoints", "StandardFantasyPoints", "HalfPPRFantasyPoints") 
                                                  ),
              selectInput('ycol', 'Y Variable', c("Week", "Team", "Player", "Slot", "Pos.x", "Status", "Proj", "Actual", "Pos.y", "Tm", "PassingYds", "PassingTD", "Int", "PassingAtt", "Cmp", "RushingAtt", "RushingYds", "RushingTD", "Rec", "Tgt", "ReceivingYds", "ReceivingTD", "FL", "PPRFantasyPoints", "StandardFantasyPoints", "HalfPPRFantasyPoints"),
                          selected="Proj"),
              numericInput('clusters', 'Cluster count', 3,
-                          min = 1, max = 9)
+                          min = 1, max = 9),
+             
+            # textInput('filename', "Filename"),
+             
+             downloadButton('Download Plot')
+             
            ),
           
            mainPanel(
+             h5("This page has the functionality to perform cluster analysis on the data. You can change the variables and the # of clusters using the sidebarpanel."),
              plotOutput('plot1'),
              plotOutput('plot2'), h4("Details of K means Clustering"), "Look at within cluster variation. For kth cluster, sum all pairwise squared euclidean distances between the observations in the kth cluster. Divide by number of observations.", withMathJax(),
              helpText('$$\\frac{1}{\\# of obs in cluster}$$')
@@ -74,8 +81,8 @@ sidebarLayout(
   sidebarPanel(
     selectInput('response', 'Response Variable' , c( "Proj", "Actual")), 
     selectInput('predictor', 'Predictor Variable', c("PassingAtt", "RushingAtt", "Tgt", "Cmp")),
-    numericInput('predictorvalue', 'Predictor Value', 20, min =0, max = 100, )), 
-    mainPanel("Linear Regression Model", verbatimTextOutput("lmFit"),
+    numericInput('predictorvalue', 'Predictor Value', 20, min =0, max = 100)), 
+    mainPanel(h5("This page contains output from training a linear and a random forest model on the data. You can use the sidebar panel to select the predictor and response variables, as well as enter a value to return a prediction from the linear model."), "Linear Regression Model", verbatimTextOutput("lmFit"),
               "Linear Regression Model with User Selected Numeric Input", verbatimTextOutput("lmFit2"),
               "Random Forest Model: Completions predicting Actual Points", verbatimTextOutput("rfFit"))
 )),
