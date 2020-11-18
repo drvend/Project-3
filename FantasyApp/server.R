@@ -6,7 +6,7 @@
 #
 #    http://shiny.rstudio.com/
 #
-# packages required to run this coded are listed below
+# Packages required to run this coded are listed below
 library(shiny)
 library(readr)
 library(dplyr)
@@ -14,7 +14,7 @@ library(reshape2)
 library(ggplot2)
 library(caret)
 library(randomForest)
-#library(DT)
+library(DT)
 
 # Server
 shinyServer(function(input, output, session) {
@@ -198,31 +198,17 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
         
         output$summary <- renderDataTable({
         
-        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
+        sALL <- fantasyData  %>% group_by(Player) %>%  summarise(avgProjectedPoints = round(mean(Proj),2), avgActualPoints = round(mean(Actual),2), avgPassingAttempts = round(mean(PassingAtt),2), avgRushingAttempts = round(mean(RushingAtt),2), avgCompletions = round(mean(Cmp),2), avgTargets = round(mean(Tgt),2), .groups = 'drop') %>%  dplyr::select(Player, input$var1, input$var2)
         
-      #  sALL <- round(sALL[2:5], input$nI)
+        sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = round(mean(Proj),2), avgActualPoints = round(mean(Actual),2), avgPassingAttempts = round(mean(PassingAtt),2), avgRushingAttempts = round(mean(RushingAtt),2), avgCompletions = round(mean(Cmp),2), avgTargets = round(mean(Tgt),2), .groups = 'drop') %>%  dplyr::select(Player, input$var1, input$var2)
         
+        sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = round(mean(Proj),2), avgActualPoints = round(mean(Actual),2), avgPassingAttempts = round(mean(PassingAtt),2), avgRushingAttempts = round(mean(RushingAtt),2), avgCompletions = round(mean(Cmp),2), avgTargets = round(mean(Tgt),2), .groups = 'drop') %>%  dplyr::select(Player, input$var1, input$var2)
         
-        sQB <- filter(fantasyData, Pos.y == "QB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt))%>%  dplyr::select(Player, input$var1, input$var2)
+        sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = round(mean(Proj),2), avgActualPoints = round(mean(Actual),2), avgPassingAttempts = round(mean(PassingAtt),2), avgRushingAttempts = round(mean(RushingAtt),2), avgCompletions = round(mean(Cmp),2), avgTargets = round(mean(Tgt),2), .groups = 'drop') %>%  dplyr::select(Player, input$var1, input$var2)
         
-    #    sQB <- round(sQB[2:5], input$nI)
-        
-        sWR <- filter(fantasyData, Pos.y == "WR", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
-        
-     #   sWR <- round(sWR[2:5], input$nI)
-        
-        sRB <- filter(fantasyData, Pos.y == "RB", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
-        
-     #   sRB <- round(sRB[2:5], input$nI)
-        
-        sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = mean(Proj), avgActualPoints = mean(Actual), avgPassingAttempts = mean(PassingAtt), avgRushingAttempts = mean(RushingAtt), avgCompletions = mean(Cmp), avgTargets = mean(Tgt)) %>%  dplyr::select(Player, input$var1, input$var2)
-        
-     #   sTE <- round(sTE[2:5], input$nI)
-        
-
+        sTE <- filter(fantasyData, Pos.y == "TE", na.rm = TRUE)  %>% group_by(Player) %>%  summarise(avgProjectedPoints = round(mean(Proj),2), avgActualPoints = round(mean(Actual),2), avgPassingAttempts = round(mean(PassingAtt),2), avgRushingAttempts = round(mean(RushingAtt),2), avgCompletions = round(mean(Cmp),2), avgTargets = round(mean(Tgt),2), .groups = 'drop') %>%  dplyr::select(Player, input$var1, input$var2) 
         
         #If - else logic to select data for summary display 
-        
         
           if(input$pos == "QB"){sQB}
           else{
@@ -238,17 +224,30 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
                 }
           )
         
-        
-    #     
-    #   #  QBscatter1 <- ggplot(sQB, aes(x = avgProjectedPoints, y = AvgPassingA)) + geom_point()
-    #     
-    # #    QBscatter2 <- ggplot(sQB, aes(x = avgCompletions, y = AvgPA)) + geom_point()
-    #     
-     #   output$qbScatter <- renderDataTable({
-     #    if(input$qbScatter == "Passing Attempts vs. Actual Points"){QBscatter1}
-     #  else{QBscatter2}
-     # })
-        
+        {observe(
+        if(input$pos == "QB")
+          {updateRadioButtons(session, "var2", selected = "avgPassingAttempts")}
+        else{
+          if(input$pos == "WR")
+            {updateRadioButtons(session, "var2", "Summary Variable 2",selected =  "avgTargets")}
+          else{
+            if(input$pos == "RB")
+              {updateRadioButtons(session, "var2", "Summary Variable 2", selected =  "avgRushingAttempts")}
+            else{
+              if(input$pos == "TE")
+      {updateRadioButtons(session, "var2", "Summary Variable 2", selected =  "avgTargets")}
+              else{updateRadioButtons(session, "var2", "Summary Variable 2", selected = "PassingAttempts")}
+            }
+          }
+        }
+)}
+        # 
+        # output$plot20 <- renderPlot({
+        #   ggplot(fantasyData, aes(Proj, PassingAtt)) +
+        #     geom_point() +
+        #     coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = FALSE)
+        # })
+ 
 # Clustering with Dendogram 
 
     scaledData <- as.data.frame(scale(fantasyDataNumeric, center = TRUE, scale = TRUE))
@@ -280,7 +279,15 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
       })
     
     
-
+    
+    # 
+    # output$downloadPlot <- downloadHandler(
+    #   filename = function() { paste(input$dataset, '.pdf', sep='') },
+    #   content = function(file) {
+    #     ggsave(file, plot = hierClust, device = "pdf")
+    #   }
+    # )
+    
 
 # Modeling 
     
@@ -295,21 +302,29 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
     
     # Linear model 
     
-    lmFit <- train(Actual ~ Cmp, data = qbTrain,
-                   method = "lm")
+    lmFitvalue <- reactive({lmFit <- train(as.formula(input$response ~ input$predictor), data = qbTrain, method = "lm")})
     
-    predlm <- predict(lmFit, newdata = qbTest)
-    postResample(predlm, qbTest$X)
     
-    output$lmFit <- renderPrint({lmFit}) 
     
+    output$lmFit <- renderPrint({
+      predlm <- predict(lmFitvalue(), newdata = qbTest)
+      postResample(predlm, qbTest$X)
+      lmFitvalue()}) 
+    
+    # Linear Model Output for Numeric Input 
+    
+     predlm2value <- reactive({ predlm2<-predict(as.formula(input$response ~ input$predictor), newdata = data.frame(Cmp = input$predictorvalue))})
+    
+    output$lmFit2 <- renderPrint({predlm2value()})
+
     # Random Forest Model 
 
     rfFit <- train(Actual ~ Cmp, data = qbTrain,
                    method = "rf",
                    trControl = trainControl(method = "cv",
-                                            number = 5),
-                   tuneGrid = data.frame(mtry = 1:9))
+                                            number = 5)
+                   #,tuneGrid = data.frame(mtry = 1:9)
+                   )
     
     output$rfFit <- renderPrint({rfFit})
         
