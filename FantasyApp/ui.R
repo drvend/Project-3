@@ -72,8 +72,8 @@ tabPanel("Clustering",
 tabPanel("Modeling",
 sidebarLayout(
   sidebarPanel(
-    selectInput('response', 'Response Variable' , c( "avgProjectedPoints", "avgActualPoints")), 
-    selectInput('predictor', 'Predictor Variable', c("avgPassingAttempts", "avgRushingAttempts", "avgTargets", "avgCompletions")),
+    selectInput('response', 'Response Variable' , c( "Proj", "Actual")), 
+    selectInput('predictor', 'Predictor Variable', c("PassingAtt", "RushingAtt", "Tgt", "Cmp")),
     numericInput('predictorvalue', 'Predictor Value', 20, min =0, max = 100, )), 
     mainPanel("Linear Regression Model", verbatimTextOutput("lmFit"),
               "Linear Regression Model with User Selected Numeric Input", verbatimTextOutput("lmFit2"),

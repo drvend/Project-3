@@ -238,6 +238,30 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
                 }
           )
         
+        {observe(
+        if(input$pos == "QB")
+          {updateRadioButtons(session, "var2", selected = "avgPassingAttempts")}
+        else{
+          if(input$pos == "WR")
+            {updateRadioButtons(session, "var2", "Summary Variable 2",selected =  "avgTargets")}
+          else{
+            if(input$pos == "RB")
+              {updateRadioButtons(session, "var2", "Summary Variable 2", selected =  "avgRushingAttempts")}
+            else{
+              if(input$pos == "TE")
+      {updateRadioButtons(session, "var2", "Summary Variable 2", selected =  "avgTargets")}
+              else{updateRadioButtons(session, "var2", "Summary Variable 2", selected = "PassingAttempts")}
+            }
+          }
+        }
+)}
+        
+        
+        
+        
+        
+        
+        
         
     #     
     #   #  QBscatter1 <- ggplot(sQB, aes(x = avgProjectedPoints, y = AvgPassingA)) + geom_point()
@@ -295,7 +319,7 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
     
     # Linear model 
     
-    lmFitvalue <- reactive({lmFit <- train(input$response ~ input$predictor, data = qbTrain, method = "lm")})
+    lmFitvalue <- reactive({lmFit <- train(as.formula(input$response ~ input$predictor), data = qbTrain, method = "lm")})
     
     
     
@@ -306,7 +330,7 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
     
     # Linear Model Output for Numeric Input 
     
-     predlm2value <- reactive({ predlm2<-predict(lmFitvalue(), newdata = data.frame(Cmp = input$predictorvalue))})
+     predlm2value <- reactive({ predlm2<-predict(as.formula(input$response ~ input$predictor), newdata = data.frame(Cmp = input$predictorvalue))})
     
     output$lmFit2 <- renderPrint({predlm2value()})
 
