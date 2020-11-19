@@ -112,10 +112,6 @@ shinyServer(function(input, output, session) {
         
         melted_cor <- melt(cormat)
         
-        # filter data for Var1 only = StandardFantasyPoints, PPRFantasyPoints, HalfPPRFantasyPoints
-        #Subset only for Shares 
-      #  melted_cor <- filter(melted_cor, melted_cor$Var2 == "Actual")
-        
         
 melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantasyPoints", "HalfPPRFantasyPoints", "Proj", "Actual"))
         
@@ -241,13 +237,43 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
           }
         }
 )}
-        # 
-        # output$plot20 <- renderPlot({
-        #   ggplot(fantasyData, aes(Proj, PassingAtt)) +
-        #     geom_point() +
-        #     coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = FALSE)
-        # })
- 
+     
+        # 2nd Dynamic UI element 
+        {observe(
+          if(input$xcol == "PassingYds")
+          {updateRadioButtons(session, "ycol", selected = "Cmp")}
+        )}
+          
+        # Server Code for Single zoomable plot (on left)
+        ranges <- reactiveValues(x = NULL, y = NULL)
+        
+        output$plot3 <- renderPlot({
+          ggplot(fantasyData, aes(Cmp, Proj)) +
+            geom_point() +
+            coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = FALSE)
+        })
+        
+        # When a double-click happens, check if there's a brush on the plot.
+        # If so, zoom to the brush bounds; if not, reset the zoom.
+        observeEvent(input$plot3_dblclick, {
+          brush <- input$plot3_brush
+          if (!is.null(brush)) {
+            ranges$x <- c(brush$xmin, brush$xmax)
+            ranges$y <- c(brush$ymin, brush$ymax)
+            
+          } else {
+            ranges$x <- NULL
+            ranges$y <- NULL
+          }
+        })
+        
+        output$downloadPlot <- downloadHandler(
+          filename = function() { paste(input$dataset, '.png', sep='') },
+          content = function(file) {
+            ggsave(file, plot = output$plot3, device = "png")
+          }
+        )
+        
 # Clustering with Dendogram 
 
     scaledData <- as.data.frame(scale(fantasyDataNumeric, center = TRUE, scale = TRUE))
@@ -278,20 +304,10 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
     plot(hierClust, xlab = "")
       })
     
-    
-    
-    # 
-    # output$downloadPlot <- downloadHandler(
-    #   filename = function() { paste(input$dataset, '.pdf', sep='') },
-    #   content = function(file) {
-    #     ggsave(file, plot = hierClust, device = "pdf")
-    #   }
-    # )
-    
 
 # Modeling 
     
-    # Train and Test sets 
+    # Create Train and Test data sets 
     
     qbData <- filter(fantasyData, Pos.y == "QB")
     
@@ -300,33 +316,67 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
     qbTrain <- qbData[qbIndex, ]
     qbTest <- qbData[-qbIndex, ]
     
-    # Linear model 
-    
-    lmFitvalue <- reactive({lmFit <- train(as.formula(input$response ~ input$predictor), data = qbTrain, method = "lm")})
-    
-    
-    
+    # Linear Model Ouput 
+
+      lmFitvalue <- reactive({lmFit <- train(as.formula(paste(input$response, "~", input$predictor)), data = qbTrain, method = "lm")})
+
     output$lmFit <- renderPrint({
       predlm <- predict(lmFitvalue(), newdata = qbTest)
-      postResample(predlm, qbTest$X)
-      lmFitvalue()}) 
+      predlm
+     })
+    
+    output$lmsumm <- renderPrint({
+      summlm <- summary(lmFitvalue())
+      summlm
+    })
     
     # Linear Model Output for Numeric Input 
-    
-     predlm2value <- reactive({ predlm2<-predict(as.formula(input$response ~ input$predictor), newdata = data.frame(Cmp = input$predictorvalue))})
-    
+
+    predlm2value <- reactive({
+      newdata = data.frame(input$predictorvalue)
+      names(newdata) = input$predictor
+      predlm2<-predict(lmFitvalue(), newdata = newdata)
+      predlm2
+    })
+    #
     output$lmFit2 <- renderPrint({predlm2value()})
-
+    
     # Random Forest Model 
+    
+ #   crossvnum <- reactive({input$cvval()})
 
-    rfFit <- train(Actual ~ Cmp, data = qbTrain,
+    rfFitvalue <- reactive({rfFit <- train(as.formula(paste(input$response, "~", input$predictor)), data = qbTrain,
                    method = "rf",
                    trControl = trainControl(method = "cv",
                                             number = 5)
-                   #,tuneGrid = data.frame(mtry = 1:9)
+                   ,tuneGrid = data.frame(mtry = 1:9)
                    )
-    
-    output$rfFit <- renderPrint({rfFit})
+    })
+
+   output$rfFit <- renderPrint({rfFit})
+
+   output$rfFit1 <- renderPrint({
+     predlm <- predict(lmFitvalue(), newdata = qbTest)
+     predlm
+   })
+
+   output$rfsumm <- renderPrint({
+     summrf <- summary(rfFitvalue())
+     summrf
+   })
+
+    # Original RF Code 
+   # Random Forest Model
+# 
+#     rfFit <- train(Actual ~ Cmp, data = qbTrain,
+#                    method = "rf",
+#                    trControl = trainControl(method = "cv",
+#                                             number = 5)
+#                    ,tuneGrid = data.frame(mtry = 1:9)
+#     )
+# 
+#     output$rfFit1 <- renderPrint({rfFit})
+
         
     # Output Data Table for the Data Table tab 
         
@@ -350,4 +400,7 @@ melted_cor <- filter(melted_cor, Var1 %in% c("StandardFantasyPoints", "PPRFantas
               }}}}, extensions = 'Buttons', options = list("dom" = 'T<"clear">lBfrtip', buttons = list('copy', 'csv', 'excel', 'pdf', 'print'))) 
                                       
     
+      
+        
+        
 })
